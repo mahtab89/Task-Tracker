@@ -17,10 +17,7 @@ public class Task {
 
     @Override
     public String toString() {
-        return String.format(
-                "Task{id='%s', description='%s', status='%s', createdAt='%s', updatedAt='%s'}",
-                id, description, status, createdAt, updatedAt
-        );
+        return String.format("Id: '%s' | Task: '%s' | Status: '%s' | Created At: '%s' | Updated At: '%s'", this.id, this.description, this.status, this.createdAt, this.updatedAt);
     }
 
 

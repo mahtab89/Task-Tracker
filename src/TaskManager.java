@@ -1,6 +1,8 @@
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 public class TaskManager {
     private final List<Task> tasks = new ArrayList<>();
@@ -8,9 +10,11 @@ public class TaskManager {
 
     void loadFromFile() {
         String[] tasksObj = getStrings();
+        if (tasksObj.length == 0) saveToFile();
 
         for (String obj : tasksObj) {
             obj = obj.replace("{", "").replace("}", "");
+            if (obj.isEmpty()) continue;
 
             String[] pairs = obj.split(",");
             String description = "", status = "", createdAt = "", updatedAt = "";
@@ -41,6 +45,9 @@ public class TaskManager {
     }
 
     private static String[] getStrings() {
+        File file = new File(filePath);
+        if (!file.exists()) return new String[0];
+
         StringBuilder sb = new StringBuilder();
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
             String line;
@@ -71,7 +78,9 @@ public class TaskManager {
                 if (i != tasks.toArray().length - 1) sb.append(",\n");
                 if (i == tasks.toArray().length - 1) sb.append("\n]");
             }
-            writer.write(sb.toString());
+            if (sb.isEmpty()) {
+                writer.write("[\n]");
+            } else writer.write(sb.toString());
         } catch (IOException e) {
             System.out.println("IO Exception!");
         }
@@ -83,26 +92,107 @@ public class TaskManager {
     }
 
     void deleteTask(String id) {
+        tasks.removeIf(task -> Objects.equals(task.id, id));
+        System.out.println("Task removed!");
+        saveToFile();
     }
 
-    void updateTask(String id, String newDesc, String newStatus) {
+    void updateTask(String id, String newDesc, String currTime) {
+        for (Task task : tasks) {
+            if (Objects.equals(task.id, id)) {
+                task.description = newDesc;
+                task.updatedAt = currTime;
+                System.out.println("Task updated successfully!");
+                System.out.println(task);
+                break;
+            }
+        }
+        saveToFile();
+    }
 
+    void markDone(String id, String currTime) {
+        for (Task task : tasks) {
+            if (Objects.equals(task.id, id)) {
+                task.status = "done";
+                task.updatedAt = currTime;
+                System.out.println("Task updated");
+                System.out.println(task);
+                break;
+            }
+        }
+        saveToFile();
+    }
+
+    void markInProgress(String id, String currTime) {
+        for (Task task : tasks) {
+            if (Objects.equals(task.id, id)) {
+                task.status = "in-progress";
+                task.updatedAt = currTime;
+                System.out.println("Task updated");
+                System.out.println(task);
+                break;
+            }
+        }
+        saveToFile();
     }
 
     void listAll() {
-
+        System.out.println();
+        int size = 0;
+        for (Task task : tasks) {
+            System.out.println(task);
+            size++;
+        }
+        if (size == 0) {
+            System.out.println("No task regarding this!");
+        }
+        saveToFile();
     }
 
     void listDone() {
-
+        System.out.println();
+        int size = 0;
+        for (Task task : tasks) {
+            if (Objects.equals(task.status, "done")) {
+                System.out.println(task);
+                size++;
+            }
+        }
+        if (size == 0) {
+            System.out.println("No task regarding this!");
+        }
+        saveToFile();
     }
 
     void listTodo() {
-
+        System.out.println();
+        int size = 0;
+        for (Task task : tasks) {
+            if (Objects.equals(task.status, "todo")) {
+                System.out.println(task);
+                size++;
+            }
+        }
+        if (size == 0) {
+            System.out.println("No task regarding this!");
+        }
+        saveToFile();
     }
 
     void listInProgress() {
+        System.out.println();
+        int size = 0;
+        for (Task task : tasks) {
+            if (Objects.equals(task.status, "in-progress")) {
+                System.out.println(task);
+                size++;
+            }
 
+        }
+        if (size == 0) {
+            System.out.println("No task regarding this!");
+        }
+        saveToFile();
     }
 
     List<Task> getTasks() {
